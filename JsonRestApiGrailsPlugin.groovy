@@ -12,7 +12,9 @@ class JsonRestApiGrailsPlugin {
     def dependsOn = [:]
     // resources that are excluded from plugin packaging
     def pluginExcludes = [
-            "grails-app/views/error.gsp"
+            "grails-app/views/error.gsp",
+            "grails-app/domain/org/grails/plugins/rest/SimpleDomain.groovy",
+            "grails-app/domain/org/grails/plugins/rest/EdgeCaseDomain.groovy"
     ]
 
     def author = "Matthias Hryniszak"
