@@ -19,14 +19,19 @@ import org.springframework.beans.BeanUtils;
 
 public class JSONDomainMarshaller implements ObjectMarshaller<JSON> {
 
-    static EXCLUDED = ['metaClass','class','version','properties']
+    static EXCLUDED = [
+        'metaClass',
+        'class',
+        'version',
+        'properties'
+    ]
 
     private GrailsApplication application
-    
+
     public JSONDomainMarshaller(GrailsApplication application) {
         this.application = application
     }
-     
+
     public boolean supports(Object object) {
         return isDomainClass(object.getClass())
     }
@@ -41,6 +46,14 @@ public class JSONDomainMarshaller implements ObjectMarshaller<JSON> {
             writer.object();
             def properties = BeanUtils.getPropertyDescriptors(o.getClass());
             def excludedFields = getCustomApi(o.class)?.excludedFields
+
+            /*
+             * This allows for a customization to allow for collections of child 
+             * objects (*..n) to be explicitly marshalled with the entity that
+             * was returned.  Useful when looking to optimize client library 
+             * performance and foregoing frequent round trips to the api 
+             */
+            def eagerFields = getCustomApi(o.class)?.eagerFields
             for (property in properties) {
                 String name = property.getName();
                 if(!(EXCLUDED.contains(name) || excludedFields?.contains(name))) {
@@ -51,7 +64,7 @@ public class JSONDomainMarshaller implements ObjectMarshaller<JSON> {
                             writer.key(name);
                             writer.array()
                             value.each { item ->
-                                if (isDomainClass(item.getClass())) {
+                                if (isDomainClass(item.getClass()) && ! eagerFields?.contains(name)) {
                                     json.convertAnother(item.id);
                                 } else {
                                     json.convertAnother(item);
@@ -79,7 +92,7 @@ public class JSONDomainMarshaller implements ObjectMarshaller<JSON> {
             throw new ConverterException("Exception in JSONDomainMarshaller", e);
         }
     }
-    
+
     private boolean isDomainClass(Class clazz) {
         String name = ConverterUtil.trimProxySuffix(clazz.getName());
         return application.isArtefactOfType(DomainClassArtefactHandler.TYPE, name);
