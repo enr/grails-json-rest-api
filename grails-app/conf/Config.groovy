@@ -28,3 +28,5 @@ log4j = {
 //
 // grails.'json-rest-api'.root = '/json'
 //
+grails.views.default.codec="none" // none, html, base64
+grails.views.gsp.encoding="UTF-8"
