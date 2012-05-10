@@ -14,7 +14,10 @@ class JsonRestApiGrailsPlugin {
     def pluginExcludes = [
             "grails-app/views/error.gsp",
             "grails-app/domain/org/grails/plugins/rest/SimpleDomain.groovy",
-            "grails-app/domain/org/grails/plugins/rest/EdgeCaseDomain.groovy"
+            "grails-app/domain/org/grails/plugins/rest/EdgeCaseDomain.groovy",
+            "grails-app/domain/org/grails/plugins/rest/WithEagerFieldsDomain.groovy",
+            "grails-app/domain/org/grails/plugins/rest/WithoutEagerFieldsDomain.groovy",
+            "grails-app/domain/org/grails/plugins/rest/Address.groovy"
     ]
 
     def author = "Matthias Hryniszak"

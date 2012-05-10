@@ -48,6 +48,7 @@ public class JSONDomainMarshaller implements ObjectMarshaller<JSON> {
             def excludedFields = getCustomApi(o.class)?.excludedFields
 
             /*
+             * Taken from ryannorris/grails-json-rest-api:
              * This allows for a customization to allow for collections of child 
              * objects (*..n) to be explicitly marshalled with the entity that
              * was returned.  Useful when looking to optimize client library 
