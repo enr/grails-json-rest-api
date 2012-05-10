@@ -8,7 +8,9 @@ package org.grails.plugins.rest
 
 import grails.converters.JSON;
 import org.codehaus.groovy.grails.commons.GrailsApplication;
+import org.codehaus.groovy.grails.commons.DefaultGrailsApplication;
 import org.codehaus.groovy.grails.commons.DomainClassArtefactHandler;
+import org.codehaus.groovy.grails.commons.ServiceArtefactHandler;
 import org.codehaus.groovy.grails.web.converters.ConverterUtil;
 import org.codehaus.groovy.grails.web.converters.exceptions.ConverterException;
 import org.codehaus.groovy.grails.web.converters.marshaller.ObjectMarshaller;
@@ -17,7 +19,7 @@ import org.springframework.beans.BeanUtils;
 
 public class JSONDomainMarshaller implements ObjectMarshaller<JSON> {
 
-    static EXCLUDED = ['metaClass','class','version']
+    static EXCLUDED = ['metaClass','class','version','properties']
 
     private GrailsApplication application
     
@@ -59,11 +61,17 @@ public class JSONDomainMarshaller implements ObjectMarshaller<JSON> {
                         } else if (isDomainClass(value.getClass())) {
                             writer.key(name);
                             json.convertAnother(value.id);
+                        } else if (isServiceClass(value.getClass())) {
+                            log.debug "skipping service ${name}"
+                        } else if (isGrailsApplication(value)) {
+                            log.debug "skipping grails application ${name}"
                         } else {
                             writer.key(name);
                             json.convertAnother(value);
                         }
                     }
+                } else {
+                    log.debug "skipping excluded property ${name}"
                 }
             }
             writer.endObject();
@@ -75,5 +83,14 @@ public class JSONDomainMarshaller implements ObjectMarshaller<JSON> {
     private boolean isDomainClass(Class clazz) {
         String name = ConverterUtil.trimProxySuffix(clazz.getName());
         return application.isArtefactOfType(DomainClassArtefactHandler.TYPE, name);
+    }
+    
+    private boolean isServiceClass(Class clazz) {
+        String name = ConverterUtil.trimProxySuffix(clazz.getName());
+        return application.isArtefactOfType(ServiceArtefactHandler.TYPE, name);
+    }
+        
+    private boolean isGrailsApplication(Object o) {
+        return (o instanceof DefaultGrailsApplication)
     }
 }
