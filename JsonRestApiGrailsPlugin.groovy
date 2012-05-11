@@ -17,6 +17,7 @@ class JsonRestApiGrailsPlugin {
             "grails-app/domain/org/grails/plugins/rest/EdgeCaseDomain.groovy",
             "grails-app/domain/org/grails/plugins/rest/WithEagerFieldsDomain.groovy",
             "grails-app/domain/org/grails/plugins/rest/WithoutEagerFieldsDomain.groovy",
+            "grails-app/domain/org/grails/plugins/rest/NeverSaved.groovy",
             "grails-app/domain/org/grails/plugins/rest/Address.groovy"
     ]
 

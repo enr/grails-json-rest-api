@@ -55,6 +55,7 @@ class JsonRestApiController {
       if (obj.hasErrors()) {
         status = 500
         result.message = extractErrors(obj).join(";")
+          result.errors = extractErrorsEx(obj)
         result.success = false
       } else {
         result.data = obj.save(flush: true)
@@ -82,6 +83,7 @@ class JsonRestApiController {
       if (data.result.data.hasErrors()) {
         data.status = 500
         data.result.message = extractErrors(data.result.data).join(";")
+          result.errors = extractErrorsEx(obj)
         data.result.success = false
       } else {
 	  	data.result.data = data.result.data.save(flush: true)
@@ -150,5 +152,12 @@ class JsonRestApiController {
       messageSource.getMessage(error, locale)
     }
   }
+
+    private extractErrorsEx(model) {
+      def locale = RCU.getLocale(request)
+      model.errors.fieldErrors.collect { error ->
+        [field: error.field, message: messageSource.getMessage(error, locale)]
+      }
+    }
 
 }

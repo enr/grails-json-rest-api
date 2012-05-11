@@ -66,7 +66,7 @@ public class MarshallingIntegrationTests extends GroovyTestCase {
         controller.params.entity = 'org.grails.plugins.rest.SimpleDomain'
         controller.create()
         def text = controller.modelAndView
-        def expected = '{"success":false,"message":"Property [name] of class [class org.grails.plugins.rest.SimpleDomain] cannot be null"}'
+        def expected = '{"success":false,"message":"Property [name] of class [class org.grails.plugins.rest.SimpleDomain] cannot be null","errors":[{"field":"name","message":"Property [name] of class [class org.grails.plugins.rest.SimpleDomain] cannot be null"}]}'
         def actual = controller.response.text
         assertEquals expected, actual
         int after = SimpleDomain.count()
