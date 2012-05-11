@@ -4,7 +4,7 @@ import static org.junit.Assert.*;
 import org.codehaus.groovy.grails.commons.GrailsApplication;
 import grails.converters.JSON
 
-public class JsonRestApiControllerIntegrationTests extends GroovyTestCase {
+public class ApiConfigurationIntegrationTests extends GroovyTestCase {
 
     GrailsApplication grailsApplication
     
@@ -19,58 +19,6 @@ public class JsonRestApiControllerIntegrationTests extends GroovyTestCase {
         super.tearDown()
     }
     
-    public void testNoEntity() {
-        controller.params.entity = 'no.such.Domain'
-        controller.list()
-        def text = controller.modelAndView
-        def expected = '{"success":false,"message":"Entity no.such.Domain not found"}'
-        def actual = controller.response.text
-        assertEquals expected, actual
-    }
-    
-    public void testEmptyList() {
-        controller.params.entity = 'org.grails.plugins.rest.SimpleDomain'
-        controller.list()
-        def text = controller.modelAndView
-        def expected = '{"success":true,"data":[],"count":0}'
-        def actual = controller.response.text
-        assertEquals expected, actual
-    }
-    
-    public void testSimpleDomain() {
-        def one = new SimpleDomain(name:'one').save(flush:true, failOnError:true)
-        controller.params.entity = 'org.grails.plugins.rest.SimpleDomain'
-        controller.list()
-        def text = controller.modelAndView
-        def expected = '{"success":true,"data":[{"attached":true,"errors":{"errors":[]},"id":1,"name":"one"}],"count":1}'
-        def actual = controller.response.text
-        assertEquals expected, actual
-    }
-    
-    public void testEdgeCaseDomain() {
-        def one = new EdgeCaseDomain(name:'one').save(flush:true, failOnError:true)
-        controller.params.entity = 'org.grails.plugins.rest.EdgeCaseDomain'
-        controller.list()
-        def text = controller.modelAndView
-        def expected = '{"success":true,"data":[{"attached":true,"errors":{"errors":[]},"id":1,"name":"one"}],"count":1}'
-        def actual = controller.response.text
-        assertEquals expected, actual
-    }
-    
-    public void testCreateWithErrors() {
-        int before = SimpleDomain.count()
-        controller.request.method = "POST"
-        controller.request.JSON.data = '{}'
-        controller.params.entity = 'org.grails.plugins.rest.SimpleDomain'
-        controller.create()
-        def text = controller.modelAndView
-        def expected = '{"success":false,"message":"Property [name] of class [class org.grails.plugins.rest.SimpleDomain] cannot be null"}'
-        def actual = controller.response.text
-        assertEquals expected, actual
-        int after = SimpleDomain.count()
-        assertEquals before, after
-    }
-
     public void testHasManyWithEagerFields() {
         def a1 = new Address(street:'The street, 9', city:'London').save(flush:true, failOnError:true)
         def a2 = new Address(street:'Another road, 2', city:'Manchester').save(flush:true, failOnError:true)
@@ -89,12 +37,16 @@ public class JsonRestApiControllerIntegrationTests extends GroovyTestCase {
         def jsonResult = JSON.parse(actual)
         assertTrue "Success", jsonResult.success
         assertEquals 2, jsonResult.data.addresses[0].size()
+        // order and id are random, so we need a little workaround
+        // to be cleaned
+        def a1Id = a1.id
+        def a2Id = a2.id
         def a3 = jsonResult.data.addresses[0][0]
         def a4 = jsonResult.data.addresses[0][1]
         assert ('Manchester' == a3.city || 'Manchester' == a4.city)
         assert ('London' == a3.city || 'London' == a4.city)
-        assert (1 == a3.id || 1 == a4.id)
-        assert (2 == a3.id || 2 == a4.id)
+        assert (a1Id == a3.id || a1Id == a4.id)
+        assert (a2Id == a3.id || a2Id == a4.id)
     }
     
     public void testHasManyWithoutEagerFields() {
@@ -113,9 +65,14 @@ public class JsonRestApiControllerIntegrationTests extends GroovyTestCase {
         def jsonResult = JSON.parse(actual)
         assertTrue jsonResult.success
         assertEquals 2, jsonResult.data.addresses[0].size()
+        // order and id are random, so we need a little workaround
+        // to be cleaned
+        def a1Id = a1.id
+        def a2Id = a2.id
         def id1 = jsonResult.data.addresses[0][0]
         def id2 = jsonResult.data.addresses[0][1]
-        assert (3 == id1 || 3 == id2)
-        assert (4 == id1 || 4 == id2)
+        assert (a1Id == id1 || a1Id == id2)
+        assert (a2Id == id1 || a2Id == id2)
     }
 }
+
