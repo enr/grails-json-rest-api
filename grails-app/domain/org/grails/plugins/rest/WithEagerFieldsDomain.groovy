@@ -4,11 +4,17 @@ class WithEagerFieldsDomain {
 
     String name
     
-    static hasMany = [addresses: Address]
+    SimpleDomain simple
+    
+    static hasMany = [addresses: JsonRestApiAddress]
 
     static expose = 'witheagerfields'
     
     static api = [
-        eagerFields: [ "addresses" ]
+        eagerFields: [ "addresses", "simple" ]
     ]
+    
+    static constraints = {
+        simple nullable:true
+    }
 }

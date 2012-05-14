@@ -4,7 +4,7 @@ class WithoutEagerFieldsDomain {
 
     String name
     
-    static hasMany = [addresses: Address]
+    static hasMany = [addresses: JsonRestApiAddress]
 
     static expose = 'withouteagerfields'
 
