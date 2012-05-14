@@ -25,3 +25,6 @@ won't be rendered in json ( see `JSONDomainMarshaller.EXCLUDED` field):
 
 You can see at integration tests for api usage and expected output.
 
+In `test/apps` you can find a basic sample application, taken from
+[padcom / grails-json-rest-api-examples](https://github.com/padcom/grails-json-rest-api-examples)
+
