@@ -40,6 +40,7 @@ This plugin provides effortless JSON API for GORM classes
             if (resource) {
                 JSONApiRegistry.registry[resource] = domainClass.fullName
             }
+            domainClass.metaClass.eagerFieldsAllowed = false
         }
     }
 

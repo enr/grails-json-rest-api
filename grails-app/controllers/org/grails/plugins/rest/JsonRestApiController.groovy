@@ -8,8 +8,11 @@ class JsonRestApiController {
   def list = {
     def result = [ success: true ]
     def entity = grailsApplication.getClassForName(params.entity)
+    boolean entityHasEagerFields = false
     if (entity) {
+
       def api = getCustomApi(entity)
+      entityHasEagerFields = (api?.eagerFields)
       if (api?.list instanceof Closure)
         result.data = api.list(params)
       else
@@ -23,14 +26,18 @@ class JsonRestApiController {
       result.message = "Entity ${params.entity} not found"
     }
 
+    if ((entityHasEagerFields) && (result.success) && (result.count > 0)) {
+        result.data.each { item ->
+            item.eagerFieldsAllowed = true
+        }
+    }
     String resp = result as JSON
 
     if (params.callback) {
         resp = params.callback + "(" + resp + ")"
     }
+
     render text: resp, contentType: 'application/json', status: result.success ? 200 : 500
-
-
   }
 
   def show = {
@@ -83,7 +90,7 @@ class JsonRestApiController {
       if (data.result.data.hasErrors()) {
         data.status = 500
         data.result.message = extractErrors(data.result.data).join(";")
-          result.errors = extractErrorsEx(obj)
+        result.errors = extractErrorsEx(obj)
         data.result.success = false
       } else {
 	  	data.result.data = data.result.data.save(flush: true)

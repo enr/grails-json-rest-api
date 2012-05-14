@@ -55,6 +55,7 @@ public class JSONDomainMarshaller implements ObjectMarshaller<JSON> {
              * performance and foregoing frequent round trips to the api 
              */
             def eagerFields = getCustomApi(o.class)?.eagerFields
+            def eagerFieldsAllowed = o.eagerFieldsAllowed
             for (property in properties) {
                 String name = property.getName();
                 if(!(EXCLUDED.contains(name) || excludedFields?.contains(name))) {
@@ -65,7 +66,8 @@ public class JSONDomainMarshaller implements ObjectMarshaller<JSON> {
                             writer.key(name);
                             writer.array()
                             value.each { item ->
-                                if (isDomainClass(item.getClass()) && ! eagerFields?.contains(name)) {
+                                if ((isDomainClass(item.getClass())) &&
+                                    (!eagerFields?.contains(name) || !eagerFieldsAllowed)) {
                                     json.convertAnother(item.id);
                                 } else {
                                     json.convertAnother(item);
