@@ -1,13 +1,10 @@
 package org.grails.plugins.rest
 
 import static org.junit.Assert.*;
-import org.codehaus.groovy.grails.commons.GrailsApplication;
 import grails.converters.JSON
 
 public class JsonpIntegrationTests extends GroovyTestCase {
 
-    GrailsApplication grailsApplication
-    
     def controller
     
     protected void setUp() {
@@ -23,7 +20,6 @@ public class JsonpIntegrationTests extends GroovyTestCase {
         controller.params.entity = 'no.such.Domain'
         controller.params.callback = 'testcallback'
         controller.list()
-        def text = controller.modelAndView
         def expected = 'testcallback({"success":false,"message":"Entity no.such.Domain not found"})'
         def actual = controller.response.text
         assertEquals expected, actual
@@ -33,7 +29,6 @@ public class JsonpIntegrationTests extends GroovyTestCase {
         controller.params.entity = 'org.grails.plugins.rest.NeverSavedDomain'
         controller.params.callback = 'testcallback'
         controller.list()
-        def text = controller.modelAndView
         def expected = 'testcallback({"success":true,"data":[],"count":0})'
         def actual = controller.response.text
         assertEquals expected, actual
@@ -45,7 +40,6 @@ public class JsonpIntegrationTests extends GroovyTestCase {
         controller.params.entity = 'org.grails.plugins.rest.SimpleDomain'
         controller.params.callback = 'testcallback'
         controller.list()
-        def text = controller.modelAndView
         def expected = 'testcallback({"success":true,"data":[{"attached":true,"errors":{"errors":[]},"id":'+oneId+',"name":"one"}],"count":1})'
         def actual = controller.response.text
         assertEquals expected, actual
@@ -57,7 +51,6 @@ public class JsonpIntegrationTests extends GroovyTestCase {
         controller.params.entity = 'org.grails.plugins.rest.EdgeCaseDomain'
         controller.params.callback = 'testcallback'
         controller.list()
-        def text = controller.modelAndView
         def expected = 'testcallback({"success":true,"data":[{"attached":true,"errors":{"errors":[]},"id":'+oneId+',"name":"one"}],"count":1})'
         def actual = controller.response.text
         assertEquals expected, actual
@@ -70,11 +63,8 @@ public class JsonpIntegrationTests extends GroovyTestCase {
         controller.params.entity = 'org.grails.plugins.rest.SimpleDomain'
         controller.params.callback = 'testcallback'
         controller.create()
-        def text = controller.modelAndView
         def expected = 'testcallback({"success":false,"message":"Property [name] of class [class org.grails.plugins.rest.SimpleDomain] cannot be null","errors":[{"field":"name","message":"Property [name] of class [class org.grails.plugins.rest.SimpleDomain] cannot be null"}]})'
         def actual = controller.response.text
-        println expected
-        println actual
         assertEquals expected, actual
         int after = SimpleDomain.count()
         assertEquals before, after

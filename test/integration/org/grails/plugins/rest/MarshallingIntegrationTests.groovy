@@ -1,13 +1,10 @@
 package org.grails.plugins.rest
 
 import static org.junit.Assert.*;
-import org.codehaus.groovy.grails.commons.GrailsApplication;
 import grails.converters.JSON
 
 public class MarshallingIntegrationTests extends GroovyTestCase {
 
-    GrailsApplication grailsApplication
-    
     def controller
     
     protected void setUp() {
@@ -22,7 +19,6 @@ public class MarshallingIntegrationTests extends GroovyTestCase {
     public void testNoEntity() {
         controller.params.entity = 'no.such.Domain'
         controller.list()
-        def text = controller.modelAndView
         def expected = '{"success":false,"message":"Entity no.such.Domain not found"}'
         def actual = controller.response.text
         assertEquals expected, actual
@@ -31,7 +27,6 @@ public class MarshallingIntegrationTests extends GroovyTestCase {
     public void testEmptyList() {
         controller.params.entity = 'org.grails.plugins.rest.NeverSavedDomain'
         controller.list()
-        def text = controller.modelAndView
         def expected = '{"success":true,"data":[],"count":0}'
         def actual = controller.response.text
         assertEquals expected, actual
@@ -42,7 +37,6 @@ public class MarshallingIntegrationTests extends GroovyTestCase {
         def oneId = one.id
         controller.params.entity = 'org.grails.plugins.rest.SimpleDomain'
         controller.list()
-        def text = controller.modelAndView
         def expected = '{"success":true,"data":[{"attached":true,"errors":{"errors":[]},"id":'+oneId+',"name":"one"}],"count":1}'
         def actual = controller.response.text
         assertEquals expected, actual
@@ -53,24 +47,95 @@ public class MarshallingIntegrationTests extends GroovyTestCase {
         def oneId = one.id
         controller.params.entity = 'org.grails.plugins.rest.EdgeCaseDomain'
         controller.list()
-        def text = controller.modelAndView
         def expected = '{"success":true,"data":[{"attached":true,"errors":{"errors":[]},"id":'+oneId+',"name":"one"}],"count":1}'
         def actual = controller.response.text
         assertEquals expected, actual
+    }
+
+    
+    public void testCreate() {
+        int before = SimpleDomain.count()
+        controller.request.method = "POST"
+        controller.request.JSON = '{"data":{"name":"simple test"}}'
+        controller.params.entity = 'org.grails.plugins.rest.SimpleDomain'
+        controller.create()
+        
+        def responseText = controller.response.text
+        assertNotNull responseText
+        def jsonResult = JSON.parse(responseText)
+        
+        assertTrue jsonResult.success
+        assertEquals "simple test", jsonResult.data.name
+
+        int after = SimpleDomain.count()
+        assertEquals before+1, after
     }
     
     public void testCreateWithErrors() {
         int before = SimpleDomain.count()
         controller.request.method = "POST"
-        controller.request.JSON.data = '{}'
+        controller.request.JSON = '{"data":{}}'
         controller.params.entity = 'org.grails.plugins.rest.SimpleDomain'
         controller.create()
-        def text = controller.modelAndView
         def expected = '{"success":false,"message":"Property [name] of class [class org.grails.plugins.rest.SimpleDomain] cannot be null","errors":[{"field":"name","message":"Property [name] of class [class org.grails.plugins.rest.SimpleDomain] cannot be null"}]}'
         def actual = controller.response.text
         assertEquals expected, actual
         int after = SimpleDomain.count()
         assertEquals before, after
+    }
+    
+
+    public void testUpdate() {
+        def simple = new SimpleDomain(name:'simple one')
+        simple.eagerFieldsAllowed = true
+        simple.save(flush:true, failOnError:true)
+        def withEager = new WithEagerFieldsDomain(name:'With Eager S', simple:simple)
+        withEager.eagerFieldsAllowed = true
+        withEager.save(flush:true, failOnError:true)
+        def domainId = withEager.id
+        def simpleId = simple.id
+
+        def jsonData = '{"attached":true,"id":'+domainId+',"name":"brand new name","simple":{"attached":true,"errors":{"errors":[]},"id":'+simpleId+',"name":"nneeww"}}'
+
+        controller.request.method = "PUT"
+        controller.request.JSON = '{"data":'+jsonData+'}'
+
+        controller.params.id = domainId
+        controller.params.entity = 'org.grails.plugins.rest.WithEagerFieldsDomain'
+        controller.update()
+        // {"success":true,"data":{"addresses":null,"attached":true,"errors":{"errors":[]},"id":6,"name":"brand new name","simple":5}}
+        def responseText = controller.response.text
+        assertNotNull responseText
+        def jsonResult = JSON.parse(responseText)
+        
+        assertTrue jsonResult.success
+        assertEquals "brand new name", jsonResult.data.name
+        assertEquals domainId, jsonResult.data.id
+        assertEquals simpleId, jsonResult.data.simple
+    }
+    
+    public void testUpdateDomainWithHasManyField() {
+        def rome = new JsonRestApiAddress(street:'La strada, 8', city:'Rome').save(flush:true, failOnError:true)
+        def milan = new JsonRestApiAddress(street:'Via MI, 8', city:'Milan').save(flush:true, failOnError:true)
+        def liverpool = new JsonRestApiAddress(street:'New street, 11', city:'Liverpool').save(flush:true, failOnError:true)
+        def leeds = new JsonRestApiAddress(street:'Beautiful road, 11', city:'Leeds').save(flush:true, failOnError:true)
+        def withEagerLiverpoolAndLeeds = new WithEagerFieldsDomain(name:'With Eager L+L')
+            .addToAddresses(liverpool)
+            .addToAddresses(leeds)
+            .save(flush:true, failOnError:true)
+        def domainId = withEagerLiverpoolAndLeeds.id
+    
+        def jsonData = '{"addresses":['+rome.id+','+milan.id+',],"id":'+domainId+',"name":"UPDATED_NAME"}'
+
+        controller.request.method = "PUT"
+        controller.request.JSON = '{"data":'+jsonData+'}'
+
+        controller.params.id = domainId
+        controller.params.entity = 'org.grails.plugins.rest.WithEagerFieldsDomain'
+        controller.update()
+        def expected = '{"success":true,"data":{"addresses":['+rome.id+','+milan.id+'],"attached":true,"errors":{"errors":[]},"id":'+domainId+',"name":"UPDATED_NAME","simple":null}}'
+        def actual = controller.response.text
+        assertEquals expected, actual
     }
 }
 

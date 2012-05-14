@@ -1,13 +1,10 @@
 package org.grails.plugins.rest
 
 import static org.junit.Assert.*;
-import org.codehaus.groovy.grails.commons.GrailsApplication;
 import grails.converters.JSON
 
 public class ApiConfigurationIntegrationTests extends GroovyTestCase {
 
-    GrailsApplication grailsApplication
-    
     def controller
     
     protected void setUp() {
@@ -20,8 +17,8 @@ public class ApiConfigurationIntegrationTests extends GroovyTestCase {
     }
     
     public void testHasManyWithEagerFields() {
-        def a1 = new Address(street:'The street, 9', city:'London').save(flush:true, failOnError:true)
-        def a2 = new Address(street:'Another road, 2', city:'Manchester').save(flush:true, failOnError:true)
+        def a1 = new JsonRestApiAddress(street:'The street, 9', city:'London').save(flush:true, failOnError:true)
+        def a2 = new JsonRestApiAddress(street:'Another road, 2', city:'Manchester').save(flush:true, failOnError:true)
         new WithEagerFieldsDomain(name:'With Eager')
             .addToAddresses(a1)
             .addToAddresses(a2)
@@ -30,9 +27,9 @@ public class ApiConfigurationIntegrationTests extends GroovyTestCase {
         controller.list()
         // expected something similar to:
         // {"success":true,"data":[{"addresses":[
-        //  {"attached":true,"city":"London","errors":{"errors":[]},"id":1},
-        //  {"attached":true,"city":"Manchester","errors":{"errors":[]},"id":2}],
-        //  "attached":true,"errors":{"errors":[]},"id":1,"name":"With Eager"}],"count":1}'
+        // {"attached":true,"city":"London","errors":{"errors":[]},"id":1},
+        // {"attached":true,"city":"Manchester","errors":{"errors":[]},"id":2}],
+        // "attached":true,"errors":{"errors":[]},"id":1,"name":"With Eager"}],"count":1}'
         def actual = controller.response.text
         def jsonResult = JSON.parse(actual)
         assertTrue "Success", jsonResult.success
@@ -50,8 +47,8 @@ public class ApiConfigurationIntegrationTests extends GroovyTestCase {
     }
     
     public void testHasManyWithoutEagerFields() {
-        def a1 = new Address(street:'New street, 19', city:'Liverpool').save(flush:true, failOnError:true)
-        def a2 = new Address(street:'Beautiful road, 200', city:'Leeds').save(flush:true, failOnError:true)
+        def a1 = new JsonRestApiAddress(street:'New street, 19', city:'Liverpool').save(flush:true, failOnError:true)
+        def a2 = new JsonRestApiAddress(street:'Beautiful road, 200', city:'Leeds').save(flush:true, failOnError:true)
         new WithoutEagerFieldsDomain(name:'Without Eager')
             .addToAddresses(a1)
             .addToAddresses(a2)
@@ -59,8 +56,8 @@ public class ApiConfigurationIntegrationTests extends GroovyTestCase {
         controller.params.entity = 'org.grails.plugins.rest.WithoutEagerFieldsDomain'
         controller.list()
         // expected something similar to:
-        //  {"success":true,"data":[{"addresses":[3,4],"attached":true,"errors":{"errors":[]},
-        //  "id":1,"name":"Without Eager"}],"count":1}'
+        // {"success":true,"data":[{"addresses":[3,4],"attached":true,"errors":{"errors":[]},
+        // "id":1,"name":"Without Eager"}],"count":1}'
         def actual = controller.response.text
         def jsonResult = JSON.parse(actual)
         assertTrue jsonResult.success
@@ -74,5 +71,6 @@ public class ApiConfigurationIntegrationTests extends GroovyTestCase {
         assert (a1Id == id1 || a1Id == id2)
         assert (a2Id == id1 || a2Id == id2)
     }
+
 }
 
