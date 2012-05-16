@@ -77,17 +77,13 @@ public class JSONDomainMarshaller implements ObjectMarshaller<JSON> {
                         } else if (isDomainClass(value.getClass())) {
                             writer.key(name);
                             json.convertAnother(value.id);
-                        } else if (isServiceClass(value.getClass())) {
-                            log.debug "skipping service ${name}"
-                        } else if (isGrailsApplication(value)) {
-                            log.debug "skipping grails application ${name}"
+                        } else if (isServiceClass(value.getClass()) || isGrailsApplication(value)) {
+                            log.debug "skipping property ${name}"
                         } else {
                             writer.key(name);
                             json.convertAnother(value);
                         }
                     }
-                } else {
-                    log.debug "skipping excluded property ${name}"
                 }
             }
             writer.endObject();
@@ -109,4 +105,5 @@ public class JSONDomainMarshaller implements ObjectMarshaller<JSON> {
     private boolean isGrailsApplication(Object o) {
         return (o instanceof DefaultGrailsApplication)
     }
+
 }
