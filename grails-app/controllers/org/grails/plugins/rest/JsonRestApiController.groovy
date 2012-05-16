@@ -5,6 +5,7 @@ import org.codehaus.groovy.grails.commons.GrailsClassUtils
 import org.springframework.web.servlet.support.RequestContextUtils as RCU
 
 class JsonRestApiController {
+
   def list = {
     def result = [ success: true ]
     def entity = grailsApplication.getClassForName(params.entity)
@@ -25,26 +26,21 @@ class JsonRestApiController {
       result.success = false
       result.message = "Entity ${params.entity} not found"
     }
-
     if ((entityHasEagerFields) && (result.success) && (result.count > 0)) {
         result.data.each { item ->
             item.eagerFieldsAllowed = true
         }
     }
-    String resp = result as JSON
-
+    String resp = safeJson(result)
     if (params.callback) {
         resp = params.callback + "(" + resp + ")"
     }
-
     render text: resp, contentType: 'application/json', status: result.success ? 200 : 500
   }
 
   def show = {
     def data = retrieveRecord()
-
-    String resp = data.result as JSON
-
+    String resp = safeJson(data.result)
     if (params.callback) {
       resp = params.callback + "(" + resp + ")"
     }
@@ -62,7 +58,7 @@ class JsonRestApiController {
       if (obj.hasErrors()) {
         status = 500
         result.message = extractErrors(obj).join(";")
-          result.errors = extractErrorsEx(obj)
+        result.errors = extractErrorsEx(obj)
         result.success = false
       } else {
         result.data = obj.save(flush: true)
@@ -72,13 +68,10 @@ class JsonRestApiController {
       result.message = "Entity ${params.entity} not found"
       status = 500
     }
-
-    String resp = result as JSON
-
+    String resp = safeJson(result)
     if (params.callback) {
       resp = params.callback + "(" + resp + ")"
     }
-
     render text: resp, contentType: 'application/json', status: status
   }
   
@@ -90,15 +83,12 @@ class JsonRestApiController {
       if (data.result.data.hasErrors()) {
         data.status = 500
         data.result.message = extractErrors(data.result.data).join(";")
-        result.errors = extractErrorsEx(obj)
         data.result.success = false
       } else {
 	  	data.result.data = data.result.data.save(flush: true)
       }
     }
-
-    String resp = data.result as JSON
-
+    String resp = safeJson(data.result)
     if (params.callback) {
       resp = params.callback + "(" + resp + ")"
     }
@@ -116,9 +106,7 @@ class JsonRestApiController {
       data.result.message = e.message
       data.result.status = 500
     }
-
-    String resp = data.result as JSON
-
+    String resp = safeJson(data.result)
     if (params.callback) {
       resp = params.callback + "(" + resp + ")"
     }
@@ -147,7 +135,6 @@ class JsonRestApiController {
       result.message = "Entity ${params.entity} not found"
       status = 500
     }
-
     [ result: result, status: status ]
   }
 
@@ -160,11 +147,21 @@ class JsonRestApiController {
     }
   }
 
-    private extractErrorsEx(model) {
-      def locale = RCU.getLocale(request)
-      model.errors.fieldErrors.collect { error ->
-        [field: error.field, message: messageSource.getMessage(error, locale)]
-      }
+  private extractErrorsEx(model) {
+    def locale = RCU.getLocale(request)
+    model.errors.fieldErrors.collect { error ->
+      [field: error.field, message: messageSource.getMessage(error, locale)]
     }
+  }
+
+  private safeJson(result) {
+    String resp = ""
+    try {
+        resp = result as JSON
+    } catch (Throwable t) {
+        resp = "{'success':false,'message':'${t.message}'}"
+    }
+    return resp
+  }
 
 }
