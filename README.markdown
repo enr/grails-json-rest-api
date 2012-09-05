@@ -11,7 +11,7 @@ The official repo is
 
 ***
 
-This version has been tested using Grails 2.0.3.
+This version has been tested using Grails 2.1.0.
 
 The main purpose is render domain objects to clients, so some property 
 won't be rendered in json ( see `JSONDomainMarshaller.EXCLUDED` field):
