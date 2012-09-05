@@ -6,7 +6,7 @@ import org.springframework.web.servlet.support.RequestContextUtils as RCU
 
 class JsonRestApiController {
 
-  def list = {
+  def list() {
     def result = [ success: true ]
     def entity = grailsApplication.getClassForName(params.entity)
     boolean entityHasEagerFields = false
@@ -38,7 +38,7 @@ class JsonRestApiController {
     render text: resp, contentType: 'application/json', status: result.success ? 200 : 500
   }
 
-  def show = {
+  def show() {
     def data = retrieveRecord()
     String resp = safeJson(data.result)
     if (params.callback) {
@@ -47,7 +47,7 @@ class JsonRestApiController {
     render text: resp, contentType: 'application/json', status: data.status
   }
   
-  def create = {
+  def create() {
     def result = [ success: true ]
     def status = 200
     def entity = grailsApplication.getClassForName(params.entity)
@@ -75,7 +75,7 @@ class JsonRestApiController {
     render text: resp, contentType: 'application/json', status: status
   }
   
-  def update = {
+  def update() {
     def data = retrieveRecord()
     if (data.result.success) {
       data.result.data.properties = request.JSON.data
@@ -95,7 +95,7 @@ class JsonRestApiController {
     render text: resp, contentType: 'application/json', status: data.status
   }
 
-  def delete = {
+  def delete() {
     def data = retrieveRecord()
     try {
       if (data.result.success) {
