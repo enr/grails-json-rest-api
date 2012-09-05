@@ -44,7 +44,7 @@ public class RestIntegrationTests extends GroovyTestCase {
         def oneId = one.id
         controller.params.entity = 'org.grails.plugins.rest.SimpleDomain'
         controller.list()
-        def expected = '{"success":true,"data":[{"attached":true,"errors":{"errors":[]},"id":'+oneId+',"name":"one"}],"count":1}'
+        def expected = '{"success":true,"data":[{"errors":{"errors":[]},"id":'+oneId+',"name":"one"}],"count":1}'
         def actual = controller.response.text
         assertEquals expected, actual
     }
@@ -103,7 +103,7 @@ public class RestIntegrationTests extends GroovyTestCase {
         def domainId = withEager.id
         def simpleId = simple.id
 
-        def jsonData = '{"attached":true,"id":'+domainId+',"name":"brand new name","simple":{"attached":true,"errors":{"errors":[]},"id":'+simpleId+',"name":"nneeww"}}'
+        def jsonData = '{"id":'+domainId+',"name":"brand new name","simple":{"errors":{"errors":[]},"id":'+simpleId+',"name":"nneeww"}}'
 
         controller.request.method = "PUT"
         controller.request.JSON = '{"data":'+jsonData+'}'
@@ -138,7 +138,7 @@ public class RestIntegrationTests extends GroovyTestCase {
         controller.params.id = domainId
         controller.params.entity = 'org.grails.plugins.rest.WithEagerFieldsDomain'
         controller.update()
-        def expected = '{"success":true,"data":{"addresses":['+rome.id+','+milan.id+'],"attached":true,"errors":{"errors":[]},"id":'+domainId+',"name":"UPDATED_NAME","simple":null}}'
+        def expected = '{"success":true,"data":{"addresses":['+rome.id+','+milan.id+'],"errors":{"errors":[]},"id":'+domainId+',"name":"UPDATED_NAME","simple":null}}'
         def actual = controller.response.text
         assertEquals expected, actual
     }

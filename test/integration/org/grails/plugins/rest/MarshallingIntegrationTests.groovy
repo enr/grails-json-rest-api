@@ -21,7 +21,7 @@ public class MarshallingIntegrationTests extends GroovyTestCase {
         def oneId = one.id
         controller.params.entity = 'org.grails.plugins.rest.EdgeCaseDomain'
         controller.list()
-        def expected = '{"success":true,"data":[{"attached":true,"errors":{"errors":[]},"id":'+oneId+',"name":"one"}],"count":1}'
+        def expected = '{"success":true,"data":[{"errors":{"errors":[]},"id":'+oneId+',"name":"one"}],"count":1}'
         def actual = controller.response.text
         assertEquals expected, actual
     }

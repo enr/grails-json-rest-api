@@ -19,7 +19,8 @@ won't be rendered in json ( see `JSONDomainMarshaller.EXCLUDED` field):
  * metaClass
  * class
  * version
- * properties'
+ * properties
+ * attached
  * grailsApplication instance
  * service artefacts
 

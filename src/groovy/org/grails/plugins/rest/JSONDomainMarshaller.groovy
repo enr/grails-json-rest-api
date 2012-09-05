@@ -23,7 +23,8 @@ public class JSONDomainMarshaller implements ObjectMarshaller<JSON> {
         'metaClass',
         'class',
         'version',
-        'properties'
+        'properties',
+        'attached'
     ]
 
     private GrailsApplication application
