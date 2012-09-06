@@ -1,4 +1,3 @@
-
 Grails Json Rest API Plugin
 ===========================
 
@@ -32,4 +31,4 @@ Sample app
 In `test/apps` you can find a basic sample application, taken from
 [padcom / grails-json-rest-api-examples](https://github.com/padcom/grails-json-rest-api-examples)
 
-Run `grails test-app` from the sample directory to verify everithing is working as expected.
+Run `grails test-app` from the sample directory to verify everything is working as expected.
